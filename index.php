@@ -1,16 +1,37 @@
 <?php
-require 'menu.php';
+require_once 'util.php';
+require_once 'config.php';
+require_once 'Menu.php';
 
-$sessionId   = $_POST["sessionId"];
-$serviceCode = $_POST["serviceCode"];
-$phoneNumber = $_POST["phoneNumber"];
-$text        = $_POST["text"];
+$text = $_POST['text'] ?? '';
+$sessionId = $_POST['sessionId'] ?? '';
+$phoneNumber = $_POST['phoneNumber'] ?? '';
 
-// Instantiate the BlogUSSD class and handle user input
-$blogUSSD = new BlogUSSD();
-$response = $blogUSSD->handleUserInput($text, $phoneNumber);
+$menu = new Menu($text, $sessionId, $phoneNumber, $conn);
+$input = explode("*", $menu->middleWare($text));
 
-// Output the response to the user
-header('Content-type: text/plain');
-echo $response;
+if ($text == "") {
+    $menu->mainMenu();
+} else {
+    switch ($input[0]) {
+        case "1":
+            $menu->menuSubscribe($input);
+            break;
+        case "2":
+            $menu->menuUnsubscribe($input);
+            break;
+        case "3":
+            $menu->menuRateBlog($input);
+            break;
+        case "4":
+            $menu->menuSuggestTopic($input);
+            break;
+        case "5":
+            $menu->menuFeedback($input);
+            break;
+        default:
+            echo "END Invalid option.";
+            break;
+    }
+}
 ?>
